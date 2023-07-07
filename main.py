@@ -2,7 +2,7 @@ import io
 import json
 from datetime import datetime
 from math import ceil
-from typing import Any, Optional
+from typing import Optional
 from zoneinfo import ZoneInfo
 
 import typer
@@ -10,49 +10,12 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from rich import print
-from rich.prompt import Prompt
 from typing_extensions import Annotated
 
 from canvas import body, header
-from utils.age import CurrentAge, full_age
-from utils.constants import (
-    DNI_CREATOR,
-    ESTABLISHMENT,
-    HOME_DISTRICT,
-    MAX_FIRST_PAGE,
-    MONTHS_ES,
-    SERVICE_PRODUCER,
-)
+from utils.patients import input_patients
 
 app = typer.Typer()
-
-
-def get_patient_data(people_data: Any, codes_data: Any):
-    dni = Prompt.ask("\n[blue]Número de DNI[/blue]")
-    weight = Prompt.ask("[blue]Peso en kg[/blue]")
-    size = Prompt.ask("[blue]Talla en cm[/blue]")
-    hb = Prompt.ask("[blue]Valor de Hb[/blue]")
-
-    age = full_age(birthday=people_data[dni]["birthday"])
-
-    if age.years == 0 and age.months == 0:
-        code = codes_data["RN"][f"{age.days}_days"]
-    elif age.years > 5:
-        code = codes_data["5_years"][f"{age.months}_months"]
-    else:
-        code = codes_data[f"{age.years}_years"][f"{age.months}_months"]
-
-    return {
-        "personal": {
-            "dni": dni,
-            "weight": weight,
-            "size": size,
-            "hb": hb,
-        },
-        "identification": people_data[dni],
-        "his": code,
-        "age": age,
-    }
 
 
 @app.command("generate")
@@ -64,52 +27,12 @@ def generate_report_front(
     if filename is None:
         filename = f"{int(today.timestamp())}_report.pdf"
 
-    with open("database/people.json", "r") as f:
-        people_data = json.load(f)
-
-    with open("database/codes.json", "r") as f:
-        codes_data = json.load(f)
-
-    free_spaces_front = 12
-    free_spaces_back = 13
-    patients_front = []
-    patients_back = []
-
-    while True:
-        print(
-            f"\n[yellow]Queda(n) {free_spaces_front} espacio(s) en la hoja.[/yellow]"
-        )
-
-        add_patient = typer.confirm("Agregar paciente?")
-        if not add_patient:
-            break
-
-        patient_data = get_patient_data(
-            people_data=people_data, codes_data=codes_data
-        )
-
-        patients_front.append(patient_data)
-
-        free_spaces_front -= ceil(len(patient_data["his"]) / 3)
+    patients_first = input_patients(blocks=12)
+    patients_second = []
 
     add_page = typer.confirm("\nAñadir página?")
     if add_page:
-        while True:
-            print(
-                f"\n[yellow]Queda(n) {free_spaces_back} espacio(s) en la hoja.[/yellow]"
-            )
-
-            add_patient = typer.confirm("Agregar paciente?")
-            if not add_patient:
-                break
-
-            patient_data = get_patient_data(
-                people_data=people_data, codes_data=codes_data
-            )
-
-            patients_back.append(patient_data)
-
-            free_spaces_back -= ceil(len(patient_data["his"]) / 3)
+        patients_second = input_patients(blocks=13)
 
     y_dni = 616
     y_name = 632.5
@@ -123,13 +46,13 @@ def generate_report_front(
     # Draw front page
     header.draw_front(canvas=board, year=today.year, month=today.month)
 
-    for p in patients_front:
+    for patient in patients_first:
         body.draw_front(
             board=board,
-            his=p["his"],
-            age=p["age"],
-            personal=p["personal"],
-            ident=p["identification"],
+            his=patient.his,
+            age=patient.age,
+            personal=patient.personal,
+            ident=patient.identification,
             day=str(today.day),
             #
             y_dni=y_dni,
@@ -138,7 +61,7 @@ def generate_report_front(
             y_code=y_code,
         )
 
-        extra_space = len(p["his"])
+        extra_space = len(patient.his)
 
         y_dni -= 47.8 * ceil(extra_space / 3)
         y_name -= 47.8 * ceil(extra_space / 3)
@@ -155,13 +78,13 @@ def generate_report_front(
 
     header.draw_back(canvas=board, year=today.year, month=today.month)
 
-    for p in patients_back:
+    for p in patients_second:
         body.draw_back(
             board=board,
-            his=p["his"],
-            age=p["age"],
-            personal=p["personal"],
-            ident=p["identification"],
+            his=p.his,
+            age=p.age,
+            personal=p.personal,
+            ident=p.identification,
             day=str(today.day),
             #
             y_dni=y_dni,
@@ -170,7 +93,7 @@ def generate_report_front(
             y_code=y_code,
         )
 
-        extra_space = len(p["his"])
+        extra_space = len(p.his)
 
         y_dni -= (47.8 + 2.5) * ceil(extra_space / 3)
         y_name -= (47.8 + 2.5) * ceil(extra_space / 3)
