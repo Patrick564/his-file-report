@@ -1,8 +1,10 @@
+import math
+from datetime import datetime
 from typing import Any
 
 from reportlab.pdfgen import canvas
 
-from utils.patients import CurrentAge
+from utils.patients import CurrentAge, PatientData
 
 
 def draw_front(
@@ -173,3 +175,65 @@ def draw_back(
             y_code -= 22.6 + 2
         else:
             y_code -= 12.6
+
+
+def draw_first_page(
+    patients: list[PatientData], board: canvas.Canvas, today: datetime
+):
+    y_dni = 616
+    y_name = 632.5
+    y_arg = 621
+    y_code = 621
+
+    for patient in patients:
+        draw_front(
+            board=board,
+            his=patient.his,
+            age=patient.age,
+            personal=patient.personal,
+            ident=patient.identification,
+            day=str(today.day),
+            #
+            y_dni=y_dni,
+            y_name=y_name,
+            y_arg=y_arg,
+            y_code=y_code,
+        )
+
+        extra_space = len(patient.his)
+
+        y_dni -= 47.8 * math.ceil(extra_space / 3)
+        y_name -= 47.8 * math.ceil(extra_space / 3)
+        y_arg -= 47.8 * math.ceil(extra_space / 3)
+        y_code -= 47.8 * math.ceil(extra_space / 3)
+
+
+def draw_second_page(
+    patients: list[PatientData], board: canvas.Canvas, today: datetime
+):
+    y_dni = 616 + 58
+    y_name = 632.5 + 58
+    y_arg = 621 + 57
+    y_code = 621 + 57
+
+    for p in patients:
+        draw_back(
+            board=board,
+            his=p.his,
+            age=p.age,
+            personal=p.personal,
+            ident=p.identification,
+            day=str(today.day),
+            #
+            y_dni=y_dni,
+            y_name=y_name,
+            y_arg=y_arg,
+            y_code=y_code,
+        )
+
+        extra_space = len(p.his)
+
+        y_dni -= (47.8 + 2.5) * math.ceil(extra_space / 3)
+        y_name -= (47.8 + 2.5) * math.ceil(extra_space / 3)
+        y_arg -= (47.8 + 2.5) * math.ceil(extra_space / 3)
+        y_code -= (47.8 + 2.5) * math.ceil(extra_space / 3)

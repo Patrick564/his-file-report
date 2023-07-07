@@ -16,6 +16,13 @@ class CurrentAge(NamedTuple):
     format: str
 
 
+class Personal(NamedTuple):
+    dni: str
+    weight: str
+    size: str
+    hb: str
+
+
 class PatientData(NamedTuple):
     personal: dict[str, str]
     identification: Any
@@ -23,7 +30,7 @@ class PatientData(NamedTuple):
     age: CurrentAge
 
 
-def full_age(birthday: str) -> CurrentAge:
+def get_current_age(birthday: str) -> CurrentAge:
     start = datetime.strptime(birthday, "%Y-%m-%d %H:%M:%S").date()
     today = datetime.now(tz=ZoneInfo("America/Lima")).date()
 
@@ -41,13 +48,13 @@ def full_age(birthday: str) -> CurrentAge:
     )
 
 
-def get_data(people_data: Any, codes_data: Any) -> PatientData:
+def get_patient_data(people_data: Any, codes_data: Any) -> PatientData:
     dni = Prompt.ask("\n[blue]Número de DNI[/blue]")
     weight = Prompt.ask("[blue]Peso en kg[/blue]")
     size = Prompt.ask("[blue]Talla en cm[/blue]")
     hb = Prompt.ask("[blue]Valor de Hb[/blue]")
 
-    age = full_age(birthday=people_data[dni]["birthday"])
+    age = get_current_age(birthday=people_data[dni]["birthday"])
 
     if age.years == 0 and age.months == 0:
         code = codes_data["RN"][f"{age.days}_days"]
@@ -69,7 +76,7 @@ def get_data(people_data: Any, codes_data: Any) -> PatientData:
     )
 
 
-def input_patients(blocks: int):
+def get_input_patients(blocks: int):
     with open("database/people.json", "r") as f:
         people_data = json.load(f)
 
@@ -85,10 +92,10 @@ def input_patients(blocks: int):
         if not add_patient:
             break
 
-        patient_data = get_data(people_data=people_data, codes_data=codes_data)
+        data = get_patient_data(people_data=people_data, codes_data=codes_data)
 
-        patients.append(patient_data)
+        patients.append(data)
 
-        blocks -= ceil(len(patient_data.his) / 3)
+        blocks -= ceil(len(data.his) / 3)
 
     return patients
