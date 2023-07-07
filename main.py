@@ -13,7 +13,7 @@ from rich import print
 from rich.prompt import Prompt
 from typing_extensions import Annotated
 
-from canvas.header import draw_back, draw_front
+from canvas import body, header
 from utils.age import CurrentAge, full_age
 from utils.constants import (
     DNI_CREATOR,
@@ -25,98 +25,6 @@ from utils.constants import (
 )
 
 app = typer.Typer()
-
-
-def draw_body(
-    board: canvas.Canvas,
-    his: Any,
-    age: CurrentAge,
-    personal: dict[str, str],
-    ident: Any,
-    day: str,
-    #
-    y_dni: float,
-    y_name: float,
-    y_arg: float,
-    y_code: float,
-):
-    X_DNI = 75.5
-    # Y_DNI = 616
-
-    X_NAME = 140
-    # Y_NAME = 632.5
-
-    X_ARG = 290
-    # Y_ARG = 621
-
-    x_code = 345.5
-    # y_code = 621
-
-    # DNI, Home district, Population center first page
-    board.setFontSize(10)
-
-    board.drawString(X_DNI, y_dni, personal["dni"])
-
-    board.setFontSize(7)
-
-    board.drawString(X_DNI - 16, y_dni - 8, day)
-    board.drawString(X_DNI + 74, y_dni + 1, ident["district"])
-    board.drawString(X_DNI + 74, y_dni - 18, ident["sector"])
-
-    # Full name and birthday first page
-    board.setFontSize(6)
-
-    board.drawString(
-        X_NAME,
-        y_name,
-        f"{ident['father_last_name']} {ident['mother_last_name']} {ident['names']}",
-    )
-    board.drawString(X_NAME + 218, y_name + 1, age.format)
-
-    # Age, gender, weight, size, hb and service first page
-    board.setFontSize(6)
-
-    board.drawString(X_ARG - 84, y_arg, str(age.years))
-    board.drawString(X_ARG - 84, y_arg - 12, str(age.months))
-    board.drawString(X_ARG - 84, y_arg - 25, str(age.days))
-
-    board.drawString(X_ARG, y_arg, personal["weight"])
-    board.drawString(X_ARG, y_arg - 13, personal["size"])
-    board.drawString(X_ARG, y_arg - 25, personal["hb"])
-
-    board.setFontSize(10)
-
-    if ident["gender"] == 1:
-        board.drawString(X_ARG - 59, y_arg - 4, "✖")
-    elif ident["gender"] == 2:
-        board.drawString(X_ARG - 59, y_arg - 23, "✖")
-
-    board.drawString(X_ARG + 22.5, y_arg - 14, "✖")
-    board.drawString(X_ARG + 36.5, y_arg - 14, "✖")
-
-    # Code write
-    for idx, d in enumerate(his):
-        board.setFontSize(6)
-
-        board.drawString(x_code + 193, y_code, d[0])
-        board.drawString(x_code, y_code, d[1])
-        board.drawString(
-            x_code + 170, y_code, f"{d[3][0]} {d[3][1]} {d[3][2]}"
-        )
-
-        board.setFontSize(10)
-
-        if d[2] == "P":
-            board.drawString(x_code + 137.5, y_code - 1, "✖")
-        elif d[2] == "D":
-            board.drawString(x_code + 148.5, y_code - 1, "✖")
-        else:
-            board.drawString(x_code + 159.5, y_code - 1, "✖")
-
-        if (idx + 1) % 3 == 0 and idx != 1 and idx != 0:
-            y_code -= 22.6
-        else:
-            y_code -= 12.6
 
 
 def get_patient_data(people_data: Any, codes_data: Any):
@@ -162,16 +70,18 @@ def generate_report_front(
     with open("database/codes.json", "r") as f:
         codes_data = json.load(f)
 
-    free_spaces = 12
+    free_spaces_front = 12
+    free_spaces_back = 13
     patients_front = []
+    patients_back = []
 
     while True:
         print(
-            f"\n[yellow]Queda(n) {free_spaces} espacio(s) en la hoja.[/yellow]"
+            f"\n[yellow]Queda(n) {free_spaces_front} espacio(s) en la hoja.[/yellow]"
         )
 
-        add = typer.confirm(f"Agregar paciente?")
-        if not add:
+        add_patient = typer.confirm("Agregar paciente?")
+        if not add_patient:
             break
 
         patient_data = get_patient_data(
@@ -180,24 +90,30 @@ def generate_report_front(
 
         patients_front.append(patient_data)
 
-        free_spaces -= ceil(len(patient_data["his"]) / 3)
+        free_spaces_front -= ceil(len(patient_data["his"]) / 3)
 
-    X_CONSTANTS = 54.5
-    Y_CONSTANTS = 673
+    add_page = typer.confirm("\nAñadir página?")
+    if add_page:
+        while True:
+            print(
+                f"\n[yellow]Queda(n) {free_spaces_back} espacio(s) en la hoja.[/yellow]"
+            )
 
-    x_dni = 75.5
+            add_patient = typer.confirm("Agregar paciente?")
+            if not add_patient:
+                break
+
+            patient_data = get_patient_data(
+                people_data=people_data, codes_data=codes_data
+            )
+
+            patients_back.append(patient_data)
+
+            free_spaces_back -= ceil(len(patient_data["his"]) / 3)
+
     y_dni = 616
-
-    x_name = 140
     y_name = 632.5
-
-    x_arg = 290
     y_arg = 621
-
-    x_const = 54.5
-    y_const = 673
-
-    x_code = 345.5
     y_code = 621
 
     extra_space = 0
@@ -205,10 +121,10 @@ def generate_report_front(
     board = canvas.Canvas(packet, pagesize=A4)
 
     # Draw front page
-    draw_front(canvas=board, year=today.year, month=today.month)
+    header.draw_front(canvas=board, year=today.year, month=today.month)
 
     for p in patients_front:
-        draw_body(
+        body.draw_front(
             board=board,
             his=p["his"],
             age=p["age"],
@@ -232,7 +148,34 @@ def generate_report_front(
     # Draw back page
     board.showPage()
 
-    draw_back(canvas=board, year=today.year, month=today.month)
+    y_dni = 616 + 58
+    y_name = 632.5 + 58
+    y_arg = 621 + 57
+    y_code = 621 + 57
+
+    header.draw_back(canvas=board, year=today.year, month=today.month)
+
+    for p in patients_back:
+        body.draw_back(
+            board=board,
+            his=p["his"],
+            age=p["age"],
+            personal=p["personal"],
+            ident=p["identification"],
+            day=str(today.day),
+            #
+            y_dni=y_dni,
+            y_name=y_name,
+            y_arg=y_arg,
+            y_code=y_code,
+        )
+
+        extra_space = len(p["his"])
+
+        y_dni -= (47.8 + 2.5) * ceil(extra_space / 3)
+        y_name -= (47.8 + 2.5) * ceil(extra_space / 3)
+        y_arg -= (47.8 + 2.5) * ceil(extra_space / 3)
+        y_code -= (47.8 + 2.5) * ceil(extra_space / 3)
 
     board.save()
     packet.seek(0)
