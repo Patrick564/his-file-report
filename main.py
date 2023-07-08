@@ -34,25 +34,17 @@ def generate_report(
     if add_page:
         patients_second = get_input_patients(blocks=13)
 
-    packet = io.BytesIO()
-    board = canvas.Canvas(packet, pagesize=A4)
+    report = body.Report()
 
-    # Draw front page
-    header.draw_front(canvas=board, year=today.year, month=today.month)
+    report.draw_header_first_page(year=today.year, month=today.month)
+    report.draw_body_front(patients=patients_first, today=today)
 
-    body.draw_first_page(board=board, patients=patients_first, today=today)
+    report.add_page()
 
-    # Draw back page
-    board.showPage()
+    report.draw_header_second_page(year=today.year, month=today.month)
+    report.draw_body_back(patients=patients_second, today=today)
 
-    header.draw_back(canvas=board, year=today.year, month=today.month)
-
-    body.draw_second_page(board=board, patients=patients_second, today=today)
-
-    board.save()
-    packet.seek(0)
-
-    new_pdf = PdfReader(packet)
+    new_pdf = PdfReader(report.save_report())
     exist = PdfReader(open("documents/HIS_format.pdf", "rb"))
     output = PdfWriter()
 
