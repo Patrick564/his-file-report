@@ -10,9 +10,9 @@ from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
-from generator import his
-from utils.constants import GENDER, INSURANCE, TYPE_OF_BIRTH
-from utils.patients import get_current_age, get_input_patients
+from .reports.his import Report
+from .utils.constants import GENDER, INSURANCE, TYPE_OF_BIRTH
+from .utils.patient import get_current_age, get_input_patients
 
 console = Console()
 app = typer.Typer()
@@ -38,7 +38,7 @@ def generate_report(
     if add_page:
         patients_second = get_input_patients(blocks=13)
 
-    report = his.Report()
+    report = Report()
 
     report.draw_header_first_page(year=today.year, month=today.month)
     report.draw_body_front(patients=patients_first, today=today)

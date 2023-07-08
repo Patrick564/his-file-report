@@ -6,13 +6,13 @@ from typing import Any
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from utils.constants import (
+from ..utils.constants import (
     DNI_CREATOR,
     ESTABLISHMENT,
     MONTHS_ES,
     SERVICE_PRODUCER,
 )
-from utils.patients import CurrentAge, PatientData
+from ..utils.patient import CurrentAge, PatientData
 
 
 class Report:
