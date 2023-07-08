@@ -14,6 +14,7 @@ class CurrentAge(NamedTuple):
     months: int
     days: int
     format: str
+    second_format: str
 
 
 class Personal(NamedTuple):
@@ -45,6 +46,7 @@ def get_current_age(birthday: str) -> CurrentAge:
         months=abs(months),
         days=abs(days),
         format=f"{start.day}   {start.month}    {start.year}",
+        second_format=f"{start.day}/{start.month}/{start.year}",
     )
 
 

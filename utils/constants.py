@@ -20,3 +20,14 @@ MONTHS_ES = {
     11: "NOVIEMBRE",
     12: "DICIEMBRE",
 }
+
+INSURANCE = {
+    0: "NO ESPECIFICADO",
+    1: "SIS",
+    2: "ESSALUD",
+    3: "OTRO",
+}
+
+GENDER = {0: "NO ESPECIFICADO", 1: "MASCULINO", 2: "FEMENINO"}
+
+TYPE_OF_BIRTH = {0: "0", 1: "1"}
