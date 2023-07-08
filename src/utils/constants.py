@@ -1,0 +1,33 @@
+MAX_FIRST_PAGE = 12
+MAX_SECOND_PAGE = 13
+
+ESTABLISHMENT = "P.S. LLAMACA"
+SERVICE_PRODUCER = "CRED"
+DNI_CREATOR = "75605327"
+HOME_DISTRICT = "SAN NICOLÁS"
+
+MONTHS_ES = {
+    1: "ENERO",
+    2: "FEBRERO",
+    3: "MARZO",
+    4: "ABRIL",
+    5: "MAYO",
+    6: "JUNIO",
+    7: "JULIO",
+    8: "AGOSTO",
+    9: "SETIEMBRE",
+    10: "OCTUBRE",
+    11: "NOVIEMBRE",
+    12: "DICIEMBRE",
+}
+
+INSURANCE = {
+    0: "NO ESPECIFICADO",
+    1: "SIS",
+    2: "ESSALUD",
+    3: "OTRO",
+}
+
+GENDER = {0: "NO ESPECIFICADO", 1: "MASCULINO", 2: "FEMENINO"}
+
+TYPE_OF_BIRTH = {0: "0", 1: "1"}
