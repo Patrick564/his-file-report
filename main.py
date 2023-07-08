@@ -1,14 +1,10 @@
-import io
 import json
 from datetime import datetime
-from math import ceil
 from typing import Optional
 from zoneinfo import ZoneInfo
 
 import typer
 from pypdf import PdfReader, PdfWriter
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
 from rich import print
 from rich.console import Console
 from rich.table import Table
@@ -74,7 +70,6 @@ def generate_report(
     )
 
 
-# Diagnosis
 @app.command("search")
 def search_by_dni(
     dni: str,

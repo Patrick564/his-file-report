@@ -12,7 +12,6 @@ from utils.constants import (
     MONTHS_ES,
     SERVICE_PRODUCER,
 )
-from utils.coordinates import X_HEADER, X_HEADER_BACK, Y_HEADER, Y_HEADER_BACK
 from utils.patients import CurrentAge, PatientData
 
 
@@ -83,7 +82,7 @@ class Report:
                 y_code=y_code,
             )
 
-            extra_space = len(patient.his)
+            extra_space = len(patient.his) * 1
 
             y_dni -= 47.8 * math.ceil(extra_space / 3)
             y_name -= 47.8 * math.ceil(extra_space / 3)
