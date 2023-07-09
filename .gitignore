@@ -1,9 +1,7 @@
-*/__pycache__/*
+**/__pycache__/**
 
-database/*
+database/*.json
 
-documents/*
+reports/*.pdf
 
-reports/*
-
-assets/*
+assets/*.pdf

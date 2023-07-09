@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -12,6 +11,7 @@ from typing_extensions import Annotated
 
 from .reports.his import Report
 from .utils.constants import GENDER, INSURANCE, TYPE_OF_BIRTH
+from .utils.files import load_diagnostic, load_patient
 from .utils.patient import get_current_age, get_input_patients
 
 console = Console()
@@ -72,50 +72,30 @@ def generate_report(
 
 @app.command("search")
 def search_by_dni(
-    dni: str,
-    diagnosis: Annotated[bool, typer.Option("--diagnosis", "-d")] = False,
+    dni: Annotated[str, typer.Argument()],
+    diagnostic: Annotated[bool, typer.Option("--diagnostic", "-d")] = False,
 ):
     """
     Busca todos los datos del paciente por DNI.
     """
+    patient = load_patient(dni=dni)
+    age = get_current_age(birthday=patient.birthday)
 
-    with open("database/people.json", "r") as f:
-        data = json.load(f)
-
-    person = data[dni]
-    age = get_current_age(birthday=person["birthday"])
-
-    print(f"\n[blue]Distrito:[/blue] [green]{person['district']}[/green]")
-    print(f"[blue]Sector:[/blue] [green]{person['sector']}[/green]")
-    print(
-        f"[blue]Apellidos y nombres:[/blue] [green]{person['father_last_name']} {person['mother_last_name']}, {person['names']}[/green]"
-    )
-    print(
-        f"[blue]Fecha de nacimiento:[/blue] [green]{age.second_format}.[/green]"
-    )
-    print(
-        f"[blue]Edad exacta:[/blue] [green]{age.years} año(s), {age.months} mes(es) y {age.days} día(s)[/green]"
-    )
-    print(
-        f"[blue]Tipo de seguro:[/blue] [green]{INSURANCE[person['insurance']]}[/green]"
-    )
-    print(f"[blue]Género:[/blue] [green]{GENDER[person['gender']]}[/green]")
-    print(
-        f"[blue]Tipo de parto:[/blue] [green]{TYPE_OF_BIRTH[person['type_of_birth']]}[/green]\n"
+    console.print(
+        f"""
+          [blue]Distrito:[/blue]            [green]{patient.district}[/green]
+          [blue]Sector:[/blue]              [green]{patient.sector}[/green]
+          [blue]Apellidos y nombres:[/blue] [green]{patient.father_last_name} {patient.mother_last_name}, {patient.names}[/green]
+          [blue]Fecha de nacimiento:[/blue] [green]{age.second_format}.[/green]
+          [blue]Edad exacta:[/blue]         [green]{age.years} año(s), {age.months} mes(es) y {age.days} día(s)[/green]
+          [blue]Tipo de seguro:[/blue]      [green]{INSURANCE[patient.insurance]}[/green]
+          [blue]Género:[/blue]              [green]{GENDER[patient.gender]}[/green]
+          [blue]Tipo de parto:[/blue]       [green]{TYPE_OF_BIRTH[patient.type_of_birth]}[/green]
+        """
     )
 
-    if diagnosis:
-        with open("database/codes.json", "r") as f:
-            codes_data = json.load(f)
-
-        age = get_current_age(birthday=data[dni]["birthday"])
-
-        if age.years == 0 and age.months == 0:
-            code = codes_data["RN"][f"{age.days}_days"]
-        elif age.years > 5:
-            code = codes_data["5_years"][f"{age.months}_months"]
-        else:
-            code = codes_data[f"{age.years}_years"][f"{age.months}_months"]
+    if diagnostic:
+        controls = load_diagnostic(age=age)
 
         table = Table()
 
@@ -126,10 +106,12 @@ def search_by_dni(
         table.add_column("LAB 2")
         table.add_column("LAB 3")
 
-        for d in code:
-            table.add_row(d[0], d[1], d[2], d[3][0], d[3][1], d[3][2])
+        for c in controls:
+            table.add_row(
+                c.cie, c.description, c.dx, c.lab[0], c.lab[1], c.lab[2]
+            )
 
-        console.print(table, "\n")
+        console.print(table)
 
 
 if __name__ == "__main__":

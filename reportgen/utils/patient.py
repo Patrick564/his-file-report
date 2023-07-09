@@ -80,7 +80,7 @@ def get_patient_data(people_data: Any, codes_data: Any) -> PatientData:
 
 def get_input_patients(blocks: int):
     with open("database/people.json", "r") as f:
-        people_data = json.load(f)
+        people_data: dict[str, dict[str, str | int]] = json.load(f)
 
     with open("database/codes.json", "r") as f:
         codes_data = json.load(f)
