@@ -1,4 +1,7 @@
+.vscode/
+
 **/__pycache__/**
+*.pyc
 
 database/*.json
 

@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
+from . import __version__
 from .reports.his import Report
 from .utils.constants import GENDER, INSURANCE, TYPE_OF_BIRTH
 from .utils.files import load_diagnostic, load_patient
@@ -21,7 +22,7 @@ app = typer.Typer()
 @app.command("generate")
 def generate_report(
     filename: Annotated[Optional[str], typer.Argument()] = None
-):
+) -> None:
     """
     Genera un PDF de dos páginas con los pacientes y sus datos ingresados.
     """
@@ -29,7 +30,7 @@ def generate_report(
     today = datetime.now(tz=ZoneInfo("America/Lima"))
 
     if filename is None:
-        filename = f"{int(today.timestamp())}_report.pdf"
+        filename = f"cred_{int(today.timestamp())}"
 
     patients_first = get_input_patients(blocks=12)
     patients_second = []
@@ -74,10 +75,11 @@ def generate_report(
 def search_by_dni(
     dni: Annotated[str, typer.Argument()],
     diagnostic: Annotated[bool, typer.Option("--diagnostic", "-d")] = False,
-):
+) -> None:
     """
     Busca todos los datos del paciente por DNI.
     """
+
     patient = load_patient(dni=dni)
     age = get_current_age(birthday=patient.birthday)
 
@@ -111,7 +113,12 @@ def search_by_dni(
                 c.cie, c.description, c.dx, c.lab[0], c.lab[1], c.lab[2]
             )
 
-        console.print(table)
+        console.print(table, "\n")
+
+
+@app.command("version")
+def version() -> None:
+    console.print(f"\n[blue]v{__version__}[/blue]\n")
 
 
 if __name__ == "__main__":
