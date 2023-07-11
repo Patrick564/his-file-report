@@ -1,44 +1,14 @@
 import json
-from dataclasses import dataclass, field
 from datetime import datetime
 from math import ceil
-from typing import Any, NamedTuple
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import typer
 from rich import print
 from rich.prompt import Prompt
 
-
-class CurrentAge(NamedTuple):
-    years: int
-    months: int
-    days: int
-    format: str
-    second_format: str
-
-
-class Personal(NamedTuple):
-    dni: str
-    weight: str
-    size: str
-    hb: str
-
-
-class PatientData(NamedTuple):
-    personal: dict[str, str]
-    identification: Any
-    his: Any
-    age: CurrentAge
-
-
-# Patients: dict[str, list[PatientData]]
-
-
-@dataclass
-class Patients:
-    first_section: list[PatientData] = field(default_factory=list)
-    second_section: list[PatientData] = field(default_factory=list)
+from reportgen.utils.custom_types import CurrentAge, PatientData
 
 
 def get_current_age(birthday: str) -> CurrentAge:

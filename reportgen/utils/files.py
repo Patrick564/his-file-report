@@ -1,11 +1,9 @@
 import json
 
-from ..models.diagnostic import Control, Diagnostic
-from ..models.patient import Patient
-from ..utils.patient import CurrentAge
+from .custom_types import Control, CurrentAge, Diagnostic, Patient
 
 
-def create_control_from_dict(**kwargs) -> Control:
+def _create_control_from_dict(**kwargs) -> Control:
     kwargs["lab"] = tuple(kwargs["lab"])
 
     return Control(**kwargs)
@@ -35,4 +33,4 @@ def load_diagnostic(age: CurrentAge) -> Diagnostic:
     keys = ["cie", "description", "dx", "lab"]
     dict_diagnostic = [dict(zip(keys, r)) for r in raw_diagnostic]
 
-    return [create_control_from_dict(**c) for c in dict_diagnostic]
+    return [_create_control_from_dict(**c) for c in dict_diagnostic]

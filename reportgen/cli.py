@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
-from reportgen.utils.patient import Patients
+from reportgen.utils.custom_types import Patients
 
 from . import __version__
 from .reports.his import Report

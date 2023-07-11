@@ -12,7 +12,7 @@ from ..utils.constants import (
     MONTHS_ES,
     SERVICE_PRODUCER,
 )
-from ..utils.patient import CurrentAge, Patients
+from ..utils.custom_types import CurrentAge, Patients
 
 
 class Report:
