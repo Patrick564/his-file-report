@@ -14,6 +14,3 @@ class Patient(NamedTuple):
     birthday: str
     appointment: str
     type_of_birth: int
-
-
-Patients = dict[str, Patient]

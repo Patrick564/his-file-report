@@ -1,4 +1,5 @@
 import json
+from dataclasses import dataclass, field
 from datetime import datetime
 from math import ceil
 from typing import Any, NamedTuple
@@ -29,6 +30,15 @@ class PatientData(NamedTuple):
     identification: Any
     his: Any
     age: CurrentAge
+
+
+# Patients: dict[str, list[PatientData]]
+
+
+@dataclass
+class Patients:
+    first_section: list[PatientData] = field(default_factory=list)
+    second_section: list[PatientData] = field(default_factory=list)
 
 
 def get_current_age(birthday: str) -> CurrentAge:

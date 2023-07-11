@@ -1,6 +1,6 @@
 import io
 import math
-from datetime import datetime
+from datetime import date
 from typing import Any
 
 from reportlab.lib.pagesizes import A4
@@ -12,11 +12,11 @@ from ..utils.constants import (
     MONTHS_ES,
     SERVICE_PRODUCER,
 )
-from ..utils.patient import CurrentAge, PatientData
+from ..utils.patient import CurrentAge, Patients
 
 
 class Report:
-    def __init__(self):
+    def __init__(self, patients: Patients, today: date) -> None:
         self.y_dni = 616
         self.y_name = 632.5
         self.y_arg = 621
@@ -25,56 +25,59 @@ class Report:
         self.packet = io.BytesIO()
         self.board = canvas.Canvas(self.packet, pagesize=A4)
 
-    def save_report(self):
+        self.patients = patients
+        self.today = today
+
+    def save_report(self) -> io.BytesIO:
         self.board.save()
         self.packet.seek(0)
 
         return self.packet
 
-    def add_page(self):
+    def add_page(self) -> None:
         self.board.showPage()
 
-    def draw_header_first_page(self, year: int, month: int):
+    def draw_header_first_page(self) -> None:
         x_title = 51
         y_title = 673.3
 
         self.board.setFontSize(7)
 
-        self.board.drawString(x_title, y_title, str(year))
-        self.board.drawString(x_title + 32, y_title, MONTHS_ES[month])
+        self.board.drawString(x_title, y_title, str(self.today.year))
+        self.board.drawString(
+            x_title + 32, y_title, MONTHS_ES[self.today.month]
+        )
         self.board.drawString(x_title + 114, y_title, ESTABLISHMENT)
         self.board.drawString(x_title + 276, y_title, SERVICE_PRODUCER)
         self.board.drawString(x_title + 458, y_title, DNI_CREATOR)
 
-    def draw_header_second_page(self, year: int, month: int):
+    def draw_header_second_page(self) -> None:
         x_title = 43.5
         y_title = 730
 
         self.board.setFontSize(7)
 
-        self.board.drawString(x_title, y_title, str(year))
-        self.board.drawString(x_title + 36, y_title, MONTHS_ES[month])
+        self.board.drawString(x_title, y_title, str(self.today.year))
+        self.board.drawString(
+            x_title + 36, y_title, MONTHS_ES[self.today.month]
+        )
         self.board.drawString(x_title + 120, y_title, ESTABLISHMENT)
         self.board.drawString(x_title + 284, y_title, SERVICE_PRODUCER)
         self.board.drawString(x_title + 473, y_title, DNI_CREATOR)
 
-    def draw_body_front(
-        self,
-        patients: list[PatientData],
-        today: datetime,
-    ):
+    def draw_body_front(self) -> None:
         y_dni: float = 617
         y_name: float = 632.4
         y_arg: float = 621
         y_code: float = 621
 
-        for patient in patients:
+        for patient in self.patients.first_section:
             self.draw_item_front(
                 his=patient.his,
                 age=patient.age,
                 personal=patient.personal,
                 ident=patient.identification,
-                day=str(today.day),
+                day=str(self.today.day),
                 #
                 y_dni=y_dni,
                 y_name=y_name,
@@ -101,7 +104,7 @@ class Report:
         y_name: float,
         y_arg: float,
         y_code: float,
-    ):
+    ) -> None:
         X_DNI = 75.5 - 4
         X_NAME = 140 - 4
         X_ARG = 290 - 4
@@ -173,23 +176,19 @@ class Report:
             else:
                 y_code -= 12.6
 
-    def draw_body_back(
-        self,
-        patients: list[PatientData],
-        today: datetime,
-    ):
+    def draw_body_back(self) -> None:
         y_dni: float = 616 + 58
         y_name: float = 632.5 + 58
         y_arg: float = 621 + 57
         y_code: float = 621 + 57
 
-        for p in patients:
+        for p in self.patients.second_section:
             self.draw_item_back(
                 his=p.his,
                 age=p.age,
                 personal=p.personal,
                 ident=p.identification,
-                day=str(today.day),
+                day=str(self.today.day),
                 #
                 y_dni=y_dni,
                 y_name=y_name,
@@ -216,7 +215,7 @@ class Report:
         y_name: float,
         y_arg: float,
         y_code: float,
-    ):
+    ) -> None:
         X_DNI = 75.5 - 10
         X_NAME = 140 - 11 + 3
         X_ARG = 290 - 16 + 12
