@@ -71,7 +71,7 @@ class Report:
         y_arg: float = 621
         y_code: float = 621
 
-        for patient in self.patients.first_section:
+        for patient in self.patients["first_section"]:
             self.draw_item_front(
                 his=patient.his,
                 age=patient.age,
@@ -182,7 +182,7 @@ class Report:
         y_arg: float = 621 + 57
         y_code: float = 621 + 57
 
-        for p in self.patients.second_section:
+        for p in self.patients["second_section"]:
             self.draw_item_back(
                 his=p.his,
                 age=p.age,

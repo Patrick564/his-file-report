@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import Any, NamedTuple
 
 
@@ -49,7 +48,4 @@ class PatientData(NamedTuple):
     age: CurrentAge
 
 
-@dataclass
-class Patients:
-    first_section: list[PatientData] = field(default_factory=list)
-    second_section: list[PatientData] = field(default_factory=list)
+Patients = dict[str, list[PatientData]]

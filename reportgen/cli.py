@@ -4,7 +4,6 @@ from zoneinfo import ZoneInfo
 
 import typer
 from pypdf import PdfReader, PdfWriter
-from rich import print
 from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
@@ -34,15 +33,20 @@ def generate_report(
     if filename is None:
         filename = f"cred_{int(today.timestamp())}"
 
-    patients = Patients()
-    patients.first_section = get_input_patients(blocks=12)
+    patients: Patients = {}
+    patients["first_section"] = get_input_patients(blocks=12)
 
-    add_page = typer.confirm("\nAñadir página?")
+    add_page = typer.confirm("\nAñadir en la segunda página?")
     if add_page:
-        patients.second_section = get_input_patients(blocks=13)
+        patients["second_section"] = get_input_patients(blocks=13)
 
     # PDF draw
     report = Report(patients=patients, today=today.date())
+
+    # possible methods for Report class
+    # report.draw_first_page()
+    # report.add_next_page()
+    # report.draw_second_page()
 
     report.draw_header_first_page()
     report.draw_body_front()
@@ -51,25 +55,25 @@ def generate_report(
     report.draw_body_back()
 
     # Write to PDF
-    new_pdf = PdfReader(report.save_report())
-    exist = PdfReader(open("assets/HIS_format.pdf", "rb"))
+    fill_report = PdfReader(report.save_report())
+    empty_format = PdfReader(open("assets/HIS_format.pdf", "rb"))
     output = PdfWriter()
 
-    front = exist.pages[0]
-    back = exist.pages[1]
+    first_page = empty_format.pages[0]
+    second_page = empty_format.pages[1]
 
-    front.merge_page(new_pdf.pages[0])
-    back.merge_page(new_pdf.pages[1])
+    first_page.merge_page(fill_report.pages[0])
+    second_page.merge_page(fill_report.pages[1])
 
-    output.add_page(front)
-    output.add_page(back)
+    output.add_page(first_page)
+    output.add_page(second_page)
 
-    st = open(f"reports/{filename}.pdf", "wb")
-    output.write(st)
-    st.close()
+    file_report = open(f"reports/{filename}.pdf", "wb")
+    output.write(file_report)
+    file_report.close()
 
-    print(
-        f"\n[green]Archivo `{filename}.pdf` creado en la carpeta `reports`.[/green]\n"
+    console.print(
+        f"\n[green]Reporte `{filename}.pdf` creado en la carpeta `reports`.[/green]\n"
     )
 
 
