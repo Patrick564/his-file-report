@@ -118,8 +118,8 @@ class Report:
         self.board.setFontSize(7)
 
         self.board.drawString(X_DNI - 17, y_dni - 8, day)
-        self.board.drawString(X_DNI + 74, y_dni + 1, ident["district"])
-        self.board.drawString(X_DNI + 74, y_dni - 18, ident["sector"])
+        self.board.drawString(X_DNI + 74, y_dni + 1, ident.district)
+        self.board.drawString(X_DNI + 74, y_dni - 18, ident.sector)
 
         # Full name and Birthday
         self.board.setFontSize(6)
@@ -127,7 +127,7 @@ class Report:
         self.board.drawString(
             X_NAME,
             y_name,
-            f"{ident['father_last_name']} {ident['mother_last_name']} {ident['names']}",
+            f"{ident.father_last_name} {ident.mother_last_name} {ident.names}",
         )
         self.board.drawString(X_NAME + 210, y_name + 0.5, age.format)
 
@@ -144,9 +144,9 @@ class Report:
 
         self.board.setFontSize(10)
 
-        if ident["gender"] == 1:
+        if ident.gender == 1:
             self.board.drawString(X_ARG - 59 + 0.5, y_arg - 4, "✖")
-        elif ident["gender"] == 2:
+        elif ident.gender == 2:
             self.board.drawString(X_ARG - 59 + 0.5, y_arg - 23, "✖")
 
         self.board.drawString(X_ARG + 22.5 + 0.5, y_arg - 14, "✖")
@@ -229,8 +229,8 @@ class Report:
         self.board.setFontSize(7)
 
         self.board.drawString(X_DNI - 16, y_dni - 8, day)
-        self.board.drawString(X_DNI + 74 + 3, y_dni + 1, ident["district"])
-        self.board.drawString(X_DNI + 74 + 3, y_dni - 18, ident["sector"])
+        self.board.drawString(X_DNI + 74 + 3, y_dni + 1, ident.district)
+        self.board.drawString(X_DNI + 74 + 3, y_dni - 18, ident.sector)
 
         # Full name and Birthday
         self.board.setFontSize(6)
@@ -238,7 +238,7 @@ class Report:
         self.board.drawString(
             X_NAME,
             y_name,
-            f"{ident['father_last_name']} {ident['mother_last_name']} {ident['names']}",
+            f"{ident.father_last_name} {ident.mother_last_name} {ident.names}",
         )
         self.board.drawString(X_NAME + 218, y_name + 1, age.format)
 
@@ -255,9 +255,9 @@ class Report:
 
         self.board.setFontSize(10)
 
-        if ident["gender"] == 1:
+        if ident.gender == 1:
             self.board.drawString(X_ARG - 59 - 1, y_arg - 4, "✖")
-        elif ident["gender"] == 2:
+        elif ident.gender == 2:
             self.board.drawString(X_ARG - 59 - 1, y_arg - 23, "✖")
 
         self.board.drawString(X_ARG + 22.5 + 1.5, y_arg - 14, "✖")

@@ -1,7 +1,5 @@
-import json
 from datetime import datetime
 from math import ceil
-from typing import Any
 from zoneinfo import ZoneInfo
 
 import typer
@@ -9,9 +7,10 @@ from rich import print
 from rich.prompt import Prompt
 
 from reportgen.utils.custom_types import CurrentAge, PatientData
+from reportgen.utils.files import load_diagnostic, load_patient
 
 
-def get_current_age(birthday: str) -> CurrentAge:
+def current_age(birthday: str) -> CurrentAge:
     start = datetime.strptime(birthday, "%Y-%m-%d %H:%M:%S").date()
     today = datetime.now(tz=ZoneInfo("America/Lima")).date()
 
@@ -30,41 +29,7 @@ def get_current_age(birthday: str) -> CurrentAge:
     )
 
 
-def get_patient_data(people_data: Any, codes_data: Any) -> PatientData:
-    dni = Prompt.ask("\n[blue]Número de DNI[/blue]")
-    weight = Prompt.ask("[blue]Peso en kg[/blue]")
-    size = Prompt.ask("[blue]Talla en cm[/blue]")
-    hb = Prompt.ask("[blue]Valor de Hb[/blue]")
-
-    age = get_current_age(birthday=people_data[dni]["birthday"])
-
-    if age.years == 0 and age.months == 0:
-        code = codes_data["RN"][f"{age.days}_days"]
-    elif age.years > 5:
-        code = codes_data["5_years"][f"{age.months}_months"]
-    else:
-        code = codes_data[f"{age.years}_years"][f"{age.months}_months"]
-
-    return PatientData(
-        personal={
-            "dni": dni,
-            "weight": weight,
-            "size": size,
-            "hb": hb,
-        },
-        identification=people_data[dni],
-        his=code,
-        age=age,
-    )
-
-
-def get_input_patients(blocks: int):
-    with open("database/people.json", "r") as f:
-        people_data: dict[str, dict[str, str | int]] = json.load(f)
-
-    with open("database/codes.json", "r") as f:
-        codes_data = json.load(f)
-
+def input_patients(blocks: int) -> list[PatientData]:
     patients: list[PatientData] = []
 
     while True:
@@ -74,10 +39,29 @@ def get_input_patients(blocks: int):
         if not add_patient:
             break
 
-        data = get_patient_data(people_data=people_data, codes_data=codes_data)
+        dni = Prompt.ask("\n[blue]Número de DNI[/blue]")
+        weight = Prompt.ask("[blue]Peso en kg[/blue]")
+        size = Prompt.ask("[blue]Talla en cm[/blue]")
+        hb = Prompt.ask("[blue]Valor de Hb[/blue]")
 
-        patients.append(data)
+        patient = load_patient(dni=dni)
+        age = current_age(birthday=patient.birthday)
+        his = load_diagnostic(age=age)
 
-        blocks -= ceil(len(data.his) / 3)
+        patients.append(
+            PatientData(
+                personal={
+                    "dni": dni,
+                    "weight": weight,
+                    "size": size,
+                    "hb": hb,
+                },
+                identification=patient,
+                his=his,
+                age=age,
+            )
+        )
+
+        blocks -= ceil(len(his) / 3)
 
     return patients

@@ -14,7 +14,7 @@ from . import __version__
 from .reports.his import Report
 from .utils.constants import GENDER, INSURANCE, TYPE_OF_BIRTH
 from .utils.files import load_diagnostic, load_patient
-from .utils.patient import get_current_age, get_input_patients
+from .utils.patient import current_age, input_patients
 
 console = Console()
 app = typer.Typer()
@@ -34,11 +34,11 @@ def generate_report(
         filename = f"cred_{int(today.timestamp())}"
 
     patients: Patients = {}
-    patients["first_section"] = get_input_patients(blocks=12)
+    patients["first_section"] = input_patients(blocks=12)
 
     add_page = typer.confirm("\nAñadir en la segunda página?")
     if add_page:
-        patients["second_section"] = get_input_patients(blocks=13)
+        patients["second_section"] = input_patients(blocks=13)
 
     # PDF draw
     report = Report(patients=patients, today=today.date())
@@ -87,7 +87,7 @@ def search_by_dni(
     """
 
     patient = load_patient(dni=dni)
-    age = get_current_age(birthday=patient.birthday)
+    age = current_age(birthday=patient.birthday)
 
     console.print(
         f"""
