@@ -8,8 +8,6 @@ from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
-from reportgen.utils.custom_types import Patients
-
 from . import __version__
 from .reports.his import Report
 from .utils.constants import GENDER, INSURANCE, TYPE_OF_BIRTH
@@ -33,29 +31,21 @@ def generate_report(
     if filename is None:
         filename = f"cred_{int(today.timestamp())}"
 
-    patients: Patients = {}
-    patients["first_section"] = input_patients(blocks=12)
+    patients = [input_patients(blocks=12)]
 
     add_page = typer.confirm("\nAñadir en la segunda página?")
     if add_page:
-        patients["second_section"] = input_patients(blocks=13)
+        patients.append(input_patients(blocks=13))
+
+    patients.append([])
 
     # PDF draw
     report = Report(patients=patients, today=today.date())
 
-    # possible methods for Report class
-    # report.draw_first_page()
-    # report.add_next_page()
-    # report.draw_second_page()
-
-    report.draw_header_first_page()
-    report.draw_body_front()
-    report.add_page()
-    report.draw_header_second_page()
-    report.draw_body_back()
+    report.generate()
 
     # Write to PDF
-    fill_report = PdfReader(report.save_report())
+    fill_report = PdfReader(report.save())
     empty_format = PdfReader(open("assets/HIS_format.pdf", "rb"))
     output = PdfWriter()
 

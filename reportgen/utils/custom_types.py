@@ -44,7 +44,7 @@ class CurrentAge(NamedTuple):
 class PatientData(NamedTuple):
     personal: dict[str, str]
     identification: Any
-    his: Any
+    his: Diagnostic
     age: CurrentAge
 
 
