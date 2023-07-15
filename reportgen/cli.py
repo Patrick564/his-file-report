@@ -8,15 +8,15 @@ from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
-from . import __version__
-from .reports.his import Report
-from .utils.constants import (
+from reportgen import __version__
+from reportgen.reports.his import Report
+from reportgen.utils.constants import (
     GENDER,
     INSURANCE,
     TYPE_OF_BIRTH,
 )
-from .utils.files import load_diagnostic, load_patient
-from .utils.patient import current_age, input_patients
+from reportgen.utils.files import load_diagnostic, load_patient
+from reportgen.utils.patient import current_age, input_patients
 
 console = Console()
 app = typer.Typer()
@@ -118,7 +118,7 @@ def search_by_dni(
 
 @app.command("version")
 def version() -> None:
-    console.print(f"\n[blue]v{__version__}[/blue]\n")
+    console.print(f"\n[blue]reportgen v{__version__}[/blue]\n")
 
 
 if __name__ == "__main__":

@@ -1,9 +1,15 @@
 import json
+from typing import Any
 
-from .custom_types import Control, CurrentAge, Diagnostic, Patient
+from reportgen.utils.custom_types import (
+    Control,
+    CurrentAge,
+    Diagnostic,
+    Patient,
+)
 
 
-def _create_control_from_dict(**kwargs) -> Control:
+def _create_control_from_dict(**kwargs: Any) -> Control:
     kwargs["lab"] = tuple(kwargs["lab"])
 
     return Control(**kwargs)
