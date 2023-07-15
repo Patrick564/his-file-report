@@ -5,22 +5,17 @@ from datetime import date
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from ..utils.constants import (
+from reportgen.utils.constants import (
     DNI_CREATOR,
     ESTABLISHMENT,
     MONTHS_ES,
     SERVICE_PRODUCER,
 )
-from ..utils.custom_types import PatientData
+from reportgen.utils.custom_types import PatientData
 
 
 class Report:
     def __init__(self, patients: list[list[PatientData]], today: date) -> None:
-        # self.y_dni = 616
-        # self.y_name = 632.5
-        # self.y_arg = 621
-        # self.y_code = 621
-
         self.packet = io.BytesIO()
         self.board = canvas.Canvas(self.packet, pagesize=A4)
 

@@ -10,7 +10,11 @@ from typing_extensions import Annotated
 
 from . import __version__
 from .reports.his import Report
-from .utils.constants import GENDER, INSURANCE, TYPE_OF_BIRTH
+from .utils.constants import (
+    GENDER,
+    INSURANCE,
+    TYPE_OF_BIRTH,
+)
 from .utils.files import load_diagnostic, load_patient
 from .utils.patient import current_age, input_patients
 
