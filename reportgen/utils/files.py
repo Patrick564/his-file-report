@@ -1,12 +1,48 @@
 import json
-from typing import Any
+import tomllib
+from typing import Any, Optional
+
+import tomlkit
 
 from reportgen.utils.custom_types import (
+    Config,
     Control,
     CurrentAge,
     Diagnostic,
     Patient,
 )
+
+
+def load_config() -> Config:
+    with open("reportgen/config/config.toml", mode="rb") as f:
+        config = tomllib.load(f)
+
+    return Config(**config["user"])
+
+
+def set_config(
+    dni: Optional[str] = None,
+    establishment: Optional[str] = None,
+    service_producer: Optional[str] = None,
+) -> None:
+    with open(
+        "reportgen/config/config.toml", mode="rt", encoding="utf-8"
+    ) as f:
+        config = tomlkit.load(f)
+
+    if dni is not None:
+        config["user"]["dni"] = dni  # type: ignore
+
+    if establishment is not None:
+        config["user"]["establishment"] = establishment  # type: ignore
+
+    if service_producer is not None:
+        config["user"]["service_producer"] = service_producer  # type: ignore
+
+    with open(
+        "reportgen/config/config.toml", mode="wt", encoding="utf-8"
+    ) as f:
+        tomlkit.dump(config, f)
 
 
 def _create_control_from_dict(**kwargs: Any) -> Control:

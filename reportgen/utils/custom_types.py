@@ -1,6 +1,12 @@
 from typing import Any, NamedTuple
 
 
+class Config(NamedTuple):
+    dni: str
+    establishment: str
+    service_producer: str
+
+
 class Control(NamedTuple):
     cie: str
     description: str

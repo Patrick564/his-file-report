@@ -15,11 +15,77 @@ from reportgen.utils.constants import (
     INSURANCE,
     TYPE_OF_BIRTH,
 )
-from reportgen.utils.files import load_diagnostic, load_patient
+from reportgen.utils.files import (
+    load_config,
+    load_diagnostic,
+    load_patient,
+    set_config,
+)
 from reportgen.utils.patient import current_age, input_patients
 
 console = Console()
 app = typer.Typer()
+
+
+@app.command("config", no_args_is_help=True)
+def config(
+    dni: Annotated[
+        Optional[str],
+        typer.Option(
+            "--set-dni",
+            "-d",
+            help="Número de DNI del encargado que se usará en el título.",
+        ),
+    ] = None,
+    establishment: Annotated[
+        Optional[str],
+        typer.Option(
+            "--set-establishment",
+            "-e",
+            help="Nombre del establecimiento que se usará de título.",
+        ),
+    ] = None,
+    service: Annotated[
+        Optional[str],
+        typer.Option(
+            "--set-service",
+            "-u",
+            help="Nombre del UPSS que se usará en el título.",
+        ),
+    ] = None,
+    show_config: Annotated[bool, typer.Option("--show", "-s")] = False,
+) -> None:
+    """
+    Listar las configuraciones actuales del usuario.
+    """
+
+    if dni is not None:
+        set_config(dni=dni)
+
+        console.print(f"\nDNI {dni} guardado correctamente.\n")
+
+    if establishment is not None:
+        set_config(establishment=establishment)
+
+        console.print(
+            f"\nEstablecimiento {establishment} guardado correctamente.\n"
+        )
+
+    if service is not None:
+        set_config(service_producer=service)
+
+        console.print(f"\nUPSS {service} guardado correctamente.\n")
+
+    if show_config:
+        user = load_config()
+
+        console.print(
+            f"""
+[blue]DNI del usuario:[/blue] {user.dni}
+[blue]Establecimiento:[/blue] {user.establishment}
+[blue]UPSS:[/blue]            {user.service_producer}
+                """
+        )
 
 
 @app.command("generate")
@@ -71,10 +137,20 @@ def generate_report(
     )
 
 
-@app.command("search")
+@app.command("search", no_args_is_help=True)
 def search_by_dni(
-    dni: Annotated[str, typer.Argument()],
-    diagnostic: Annotated[bool, typer.Option("--diagnostic", "-d")] = False,
+    dni: Annotated[
+        str,
+        typer.Argument(help="Busca por número de DNI en la base de datos."),
+    ],
+    diagnostic: Annotated[
+        bool,
+        typer.Option(
+            "--diagnostic",
+            "-d",
+            help="Agrega el diagnóstico por edad para el paciente.",
+        ),
+    ] = False,
 ) -> None:
     """
     Busca todos los datos del paciente por DNI.
@@ -85,14 +161,14 @@ def search_by_dni(
 
     console.print(
         f"""
-          [blue]Distrito:[/blue]            [green]{patient.district}[/green]
-          [blue]Sector:[/blue]              [green]{patient.sector}[/green]
-          [blue]Apellidos y nombres:[/blue] [green]{patient.father_last_name} {patient.mother_last_name}, {patient.names}[/green]
-          [blue]Fecha de nacimiento:[/blue] [green]{age.second_format}.[/green]
-          [blue]Edad exacta:[/blue]         [green]{age.years} año(s), {age.months} mes(es) y {age.days} día(s)[/green]
-          [blue]Tipo de seguro:[/blue]      [green]{INSURANCE[patient.insurance]}[/green]
-          [blue]Género:[/blue]              [green]{GENDER[patient.gender]}[/green]
-          [blue]Tipo de parto:[/blue]       [green]{TYPE_OF_BIRTH[patient.type_of_birth]}[/green]
+[blue]Distrito:[/blue]            [green]{patient.district}[/green]
+[blue]Sector:[/blue]              [green]{patient.sector}[/green]
+[blue]Apellidos y nombres:[/blue] [green]{patient.father_last_name} {patient.mother_last_name}, {patient.names}[/green]
+[blue]Fecha de nacimiento:[/blue] [green]{age.second_format}.[/green]
+[blue]Edad exacta:[/blue]         [green]{age.years} año(s), {age.months} mes(es) y {age.days} día(s)[/green]
+[blue]Tipo de seguro:[/blue]      [green]{INSURANCE[patient.insurance]}[/green]
+[blue]Género:[/blue]              [green]{GENDER[patient.gender]}[/green]
+[blue]Tipo de parto:[/blue]       [green]{TYPE_OF_BIRTH[patient.type_of_birth]}[/green]
         """
     )
 
@@ -113,12 +189,12 @@ def search_by_dni(
                 c.cie, c.description, c.dx, c.lab[0], c.lab[1], c.lab[2]
             )
 
-        console.print(table, "\n")
+        console.print(table, "")
 
 
 @app.command("version")
 def version() -> None:
-    console.print(f"\n[blue]reportgen v{__version__}[/blue]\n")
+    console.print(f"\nReportgen [blue]version {__version__}[/blue]\n")
 
 
 if __name__ == "__main__":
