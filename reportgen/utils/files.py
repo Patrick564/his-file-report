@@ -1,6 +1,6 @@
 import json
 import tomllib
-from typing import Any, Optional
+from typing import Any
 
 import tomlkit
 
@@ -21,13 +21,11 @@ def load_config() -> Config:
 
 
 def set_config(
-    dni: Optional[str] = None,
-    establishment: Optional[str] = None,
-    service_producer: Optional[str] = None,
+    dni: str | None = None,
+    establishment: str | None = None,
+    service_producer: str | None = None,
 ) -> None:
-    with open(
-        "reportgen/config/config.toml", mode="rt", encoding="utf-8"
-    ) as f:
+    with open("reportgen/config/config.toml", encoding="utf-8") as f:
         config = tomlkit.load(f)
 
     if dni is not None:
@@ -39,9 +37,7 @@ def set_config(
     if service_producer is not None:
         config["user"]["service_producer"] = service_producer  # type: ignore
 
-    with open(
-        "reportgen/config/config.toml", mode="wt", encoding="utf-8"
-    ) as f:
+    with open("reportgen/config/config.toml", mode="w", encoding="utf-8") as f:
         tomlkit.dump(config, f)
 
 
@@ -52,14 +48,14 @@ def _create_control_from_dict(**kwargs: Any) -> Control:
 
 
 def load_patient(dni: str) -> Patient:
-    with open("database/people.json", "r") as f:
+    with open("database/people.json") as f:
         patients = json.load(f)
 
     return Patient(**patients[dni])
 
 
 def load_diagnostic(age: CurrentAge) -> Diagnostic:
-    with open("database/codes.json", "r") as f:
+    with open("database/codes.json") as f:
         diagnostics = json.load(f)
 
     if age.years == 0 and age.months == 0:

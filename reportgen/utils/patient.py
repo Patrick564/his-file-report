@@ -1,5 +1,8 @@
-from datetime import datetime
+import json
+from dataclasses import dataclass, field
+from datetime import date, datetime
 from math import ceil
+from typing import Any, NamedTuple
 from zoneinfo import ZoneInfo
 
 import typer
@@ -65,3 +68,108 @@ def input_patients(blocks: int) -> list[PatientData]:
         blocks -= ceil(len(his) / 3)
 
     return patients
+
+
+GENDER = {0: "NO ESPECIFICADO", 1: "MASCULINO", 2: "FEMENINO"}
+
+INSURANCE = {
+    0: "NO ESPECIFICADO",
+    1: "SIS",
+    2: "ESSALUD",
+    3: "OTRO",
+}
+
+
+class Age(NamedTuple):
+    years: int
+    months: int
+    days: int
+
+    def __str__(self) -> str:
+        return (
+            f"{self.years} año(s), {self.months} mes(es) y {self.days} día(s)"
+        )
+
+
+class Control(NamedTuple):
+    cie: str
+    description: str
+    dx: str
+    lab: tuple[str, str, str]
+
+
+@dataclass
+class TempPatient:
+    dni: str
+    hlc: str = field(init=False)
+    district: str = field(init=False)
+    establishment: str = field(init=False)
+    sector: str = field(init=False)
+    insurance: str = field(init=False)
+    full_name: str = field(init=False)
+    gender: str = field(init=False)
+    birthday: date = field(init=False)
+    age: Age = field(init=False)
+    appointment: str = field(init=False)
+    type_of_birth: int = field(init=False)
+    diagnostic: list[Control] = field(init=False)
+
+    def __post_init__(self) -> None:
+        patient = self.load_from_json()
+
+        self.hlc = patient["hlc"]
+        self.district = patient["district"]
+        self.establishment = patient["establishment"]
+        self.sector = patient["sector"]
+        self.insurance = INSURANCE[int(patient["insurance"])]
+        self.full_name = f"{patient['father_last_name']} {patient['mother_last_name']}, {patient['names']}"
+        self.gender = GENDER[int(patient["gender"])]
+        self.birthday = datetime.strptime(
+            patient["birthday"], "%Y-%m-%d %H:%M:%S"
+        ).date()
+        self.age = self.current_age()
+        self.appointment = patient["appointment"]
+        self.type_of_birth = patient["type_of_birth"]
+        self.diagnostic = self.load_diagnostic()
+
+    def load_from_json(self) -> Any:
+        with open("database/people.json") as f:
+            patients = json.load(f)
+
+        return patients[f"{self.dni}"]
+
+    def current_age(self) -> Age:
+        today = datetime.now(tz=ZoneInfo("America/Lima")).date()
+
+        difference = today - self.birthday
+
+        years = difference.days // 365
+        months = (difference.days % 365) // 30
+        days = (difference.days % 365) % 30
+
+        return Age(abs(years), abs(months), abs(days))
+
+    def load_diagnostic(self) -> list[Control]:
+        with open("database/codes.json") as f:
+            diagnostics = json.load(f)
+
+        if self.age.years == 0 and self.age.months == 0:
+            raw_diagnostic = diagnostics["RN"][f"{self.age.days}_days"]
+        elif self.age.years > 5:
+            raw_diagnostic = diagnostics["5_years"][
+                f"{self.age.months}_months"
+            ]
+        else:
+            raw_diagnostic = diagnostics[f"{self.age.years}_years"][
+                f"{self.age.months}_months"
+            ]
+
+        return [
+            Control(
+                cie=d[0],
+                description=d[1],
+                dx=d[2],
+                lab=tuple(d[3]),  # type: ignore
+            )
+            for d in raw_diagnostic
+        ]

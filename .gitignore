@@ -4,6 +4,7 @@ assets/
 database/
 reports/
 **/config/*.toml
+.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -18,11 +18,11 @@ tomlkit = "^0.11.8"
 
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^6.0.0"
 mypy = "^1.4.1"
-isort = "^5.12.0"
 black = "^23.3.0"
 pytest = "^7.4.0"
+ruff = "^0.0.278"
+pytest-cov = "^4.1.0"
 
 
 [tool.poetry.scripts]
@@ -43,14 +43,23 @@ no_implicit_optional = true
 check_untyped_defs = true
 
 
+[tool.ruff]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    # "UP",  # alert you when better syntax is available in your python version
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+target-version = "py311"
+
 [tool.black]
 line-length = 79
-target-version = ['py311']
-
-
-[tool.isort]
-multi_line_output = 3
-force_grid_wrap = 3
-include_trailing_comma = true
-line_length = 79
-profile = "black"
