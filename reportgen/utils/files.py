@@ -48,14 +48,14 @@ def _create_control_from_dict(**kwargs: Any) -> Control:
 
 
 def load_patient(dni: str) -> Patient:
-    with open("database/people.json") as f:
+    with open("database/people.json", encoding="utf-8") as f:
         patients = json.load(f)
 
     return Patient(**patients[dni])
 
 
 def load_diagnostic(age: CurrentAge) -> Diagnostic:
-    with open("database/codes.json") as f:
+    with open("database/codes.json", encoding="utf-8") as f:
         diagnostics = json.load(f)
 
     if age.years == 0 and age.months == 0:

@@ -55,7 +55,7 @@ class Report:
         y_code: float = 621
 
         for patient in self.patients[0]:
-            self.draw_patient_first_page(
+            self.draw_patient_one(
                 patient,
                 str(self.today.day),
                 x_dni,
@@ -75,7 +75,7 @@ class Report:
             y_arg -= 47.8 * math.ceil(extra_space / 3)
             y_code -= 47.8 * math.ceil(extra_space / 3)
 
-    def draw_patient_first_page(
+    def draw_patient_one(
         self,
         patient: PatientData,
         day: str,
@@ -88,50 +88,65 @@ class Report:
         x_code: float,
         y_code: float,
     ) -> None:
-        # DNI, Home district, Population center and Day
+        # DNI
         self.board.setFontSize(10)
-
         self.board.drawString(x_dni, y_dni, patient.personal["dni"])
 
+        # Day
         self.board.setFontSize(7)
-
         self.board.drawString(x_dni - 17, y_dni - 8, day)
+
+        # Home district
         self.board.drawString(
             x_dni + 74, y_dni + 1, patient.identification.district
         )
+
+        # Population center
         self.board.drawString(
             x_dni + 74, y_dni - 18, patient.identification.sector
         )
 
-        # Full name and Birthday
+        # Full Name
         self.board.setFontSize(6)
-
         self.board.drawString(
             x_name,
             y_name,
             f"{patient.identification.father_last_name} {patient.identification.mother_last_name} {patient.identification.names}",
         )
+
+        # Birthday
         self.board.drawString(
             x_name + 210,
             y_name + 0.5,
-            f"{patient.age.b.day}  {patient.age.b.month}   {patient.age.b.year}",
+            str(patient.age.b.day),
+        )
+        self.board.drawString(
+            x_name + 210 + 11,
+            y_name + 0.5,
+            str(patient.age.b.month),
+        )
+        self.board.drawString(
+            x_name + 210 + 22,
+            y_name + 0.5,
+            str(patient.age.b.year),
         )
 
-        # Age, Gender, Weight, Size, Sb and Service
+        # Age
         self.board.setFontSize(6)
-
-        self.board.drawString(x_arg - 84 + 1, y_arg, str(patient.age.years))
+        self.board.drawString(x_arg - 85, y_arg, str(patient.age.years))
         self.board.drawString(
-            x_arg - 84 + 1, y_arg - 12, str(patient.age.months)
+            x_arg - 85, y_arg - 12, str(patient.age.months)
         )
         self.board.drawString(
-            x_arg - 84 + 1, y_arg - 25, str(patient.age.days)
+            x_arg - 85, y_arg - 25, str(patient.age.days)
         )
 
+        # Size, weight and HB
         self.board.drawString(x_arg, y_arg, patient.personal["weight"])
         self.board.drawString(x_arg, y_arg - 13, patient.personal["size"])
         self.board.drawString(x_arg, y_arg - 25, patient.personal["hb"])
 
+        # Gender
         self.board.setFontSize(10)
 
         if patient.identification.gender == 1:
@@ -139,6 +154,7 @@ class Report:
         elif patient.identification.gender == 2:
             self.board.drawString(x_arg - 59 + 0.5, y_arg - 23, "✖")
 
+        # Service
         self.board.drawString(x_arg + 22.5 + 0.5, y_arg - 14, "✖")
         self.board.drawString(x_arg + 36.5 + 0.5, y_arg - 14, "✖")
 
@@ -238,7 +254,17 @@ class Report:
         self.board.drawString(
             X_NAME + 217,
             y_name + 0.5,
-            f"{patient.age.b.day}  {patient.age.b.month}   {patient.age.b.year}",
+            str(patient.age.b.day),
+        )
+        self.board.drawString(
+            X_NAME + 217 + 11,
+            y_name + 0.5,
+            str(patient.age.b.month),
+        )
+        self.board.drawString(
+            X_NAME + 217 + 22,
+            y_name + 0.5,
+            str(patient.age.b.year),
         )
 
         # Age, Gender, Weight, Size, Hb and Service

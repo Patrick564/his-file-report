@@ -134,7 +134,7 @@ class TempPatient:
         self.diagnostic = self.load_diagnostic()
 
     def load_from_json(self) -> Any:
-        with open("database/people.json") as f:
+        with open("database/people.json", encoding="utf-8") as f:
             patients = json.load(f)
 
         return patients[f"{self.dni}"]
@@ -151,7 +151,7 @@ class TempPatient:
         return Age(abs(years), abs(months), abs(days))
 
     def load_diagnostic(self) -> list[Control]:
-        with open("database/codes.json") as f:
+        with open("database/codes.json", encoding="utf-8") as f:
             diagnostics = json.load(f)
 
         if self.age.years == 0 and self.age.months == 0:
