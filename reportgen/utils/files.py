@@ -69,6 +69,8 @@ def load_diagnostic(age: CurrentAge) -> Diagnostic:
         ]
 
     keys = ["cie", "description", "dx", "lab"]
-    dict_diagnostic = [dict(zip(keys, r)) for r in raw_diagnostic]
+    dict_diagnostic = [
+        dict(zip(keys, r)) for r in raw_diagnostic
+    ]  # noqa: B905
 
     return [_create_control_from_dict(**c) for c in dict_diagnostic]

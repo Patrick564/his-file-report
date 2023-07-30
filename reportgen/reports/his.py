@@ -15,6 +15,14 @@ from reportgen.utils.custom_types import PatientData
 
 
 class Report:
+    X_TITLE: float = 51
+    Y_TITLE: float = 673.3
+
+    X_DNI: float = 71.5
+    X_NAME: float = 136
+    X_ARG: float = 286
+    X_CODE: float = 341.5
+
     def __init__(self, patients: list[list[PatientData]], today: date) -> None:
         self.packet = io.BytesIO()
         self.board = canvas.Canvas(self.packet, pagesize=A4)
@@ -25,21 +33,22 @@ class Report:
     def add_next_page(self) -> None:
         self.board.showPage()
 
-    def draw_title_first_page(self) -> None:
-        x_title = 51
-        y_title = 673.3
-
+    def draw_title_one(self, x: float, y: float) -> None:
         self.board.setFontSize(7)
 
-        self.board.drawString(x_title, y_title, str(self.today.year))
-        self.board.drawString(
-            x_title + 32, y_title, MONTHS_ES[self.today.month]
-        )
-        self.board.drawString(x_title + 114, y_title, ESTABLISHMENT)
-        self.board.drawString(x_title + 276, y_title, SERVICE_PRODUCER)
-        self.board.drawString(x_title + 458, y_title, DNI_CREATOR)
+        self.board.drawString(x, y, str(self.today.year))
+        self.board.drawString(x + 32, y, MONTHS_ES[self.today.month])
+        self.board.drawString(x + 114, y, ESTABLISHMENT)
+        self.board.drawString(x + 276, y, SERVICE_PRODUCER)
+        self.board.drawString(x + 458, y, DNI_CREATOR)
 
-    def draw_body_first_page(self) -> None:
+    def draw_body_one(
+        self,
+        x_dni: float,
+        x_name: float,
+        x_arg: float,
+        x_code: float,
+    ) -> None:
         y_dni: float = 617
         y_name: float = 632.4
         y_arg: float = 621
@@ -47,12 +56,16 @@ class Report:
 
         for patient in self.patients[0]:
             self.draw_patient_first_page(
-                patient=patient,
-                day=str(self.today.day),
-                y_dni=y_dni,
-                y_name=y_name,
-                y_arg=y_arg,
-                y_code=y_code,
+                patient,
+                str(self.today.day),
+                x_dni,
+                y_dni,
+                x_name,
+                y_name,
+                x_arg,
+                y_arg,
+                x_code,
+                y_code,
             )
 
             extra_space = len(patient.his) * 1
@@ -66,65 +79,68 @@ class Report:
         self,
         patient: PatientData,
         day: str,
+        x_dni: float,
         y_dni: float,
+        x_name: float,
         y_name: float,
+        x_arg: float,
         y_arg: float,
+        x_code: float,
         y_code: float,
     ) -> None:
-        X_DNI = 75.5 - 4
-        X_NAME = 140 - 4
-        X_ARG = 290 - 4
-        x_code = 345.5 - 4
-
-        # DNI, Home district, Population center and Day first page
+        # DNI, Home district, Population center and Day
         self.board.setFontSize(10)
 
-        self.board.drawString(X_DNI, y_dni, patient.personal["dni"])
+        self.board.drawString(x_dni, y_dni, patient.personal["dni"])
 
         self.board.setFontSize(7)
 
-        self.board.drawString(X_DNI - 17, y_dni - 8, day)
+        self.board.drawString(x_dni - 17, y_dni - 8, day)
         self.board.drawString(
-            X_DNI + 74, y_dni + 1, patient.identification.district
+            x_dni + 74, y_dni + 1, patient.identification.district
         )
         self.board.drawString(
-            X_DNI + 74, y_dni - 18, patient.identification.sector
+            x_dni + 74, y_dni - 18, patient.identification.sector
         )
 
         # Full name and Birthday
         self.board.setFontSize(6)
 
         self.board.drawString(
-            X_NAME,
+            x_name,
             y_name,
             f"{patient.identification.father_last_name} {patient.identification.mother_last_name} {patient.identification.names}",
         )
-        self.board.drawString(X_NAME + 210, y_name + 0.5, patient.age.format)
+        self.board.drawString(
+            x_name + 210,
+            y_name + 0.5,
+            f"{patient.age.b.day}  {patient.age.b.month}   {patient.age.b.year}",
+        )
 
         # Age, Gender, Weight, Size, Sb and Service
         self.board.setFontSize(6)
 
-        self.board.drawString(X_ARG - 84 + 1, y_arg, str(patient.age.years))
+        self.board.drawString(x_arg - 84 + 1, y_arg, str(patient.age.years))
         self.board.drawString(
-            X_ARG - 84 + 1, y_arg - 12, str(patient.age.months)
+            x_arg - 84 + 1, y_arg - 12, str(patient.age.months)
         )
         self.board.drawString(
-            X_ARG - 84 + 1, y_arg - 25, str(patient.age.days)
+            x_arg - 84 + 1, y_arg - 25, str(patient.age.days)
         )
 
-        self.board.drawString(X_ARG, y_arg, patient.personal["weight"])
-        self.board.drawString(X_ARG, y_arg - 13, patient.personal["size"])
-        self.board.drawString(X_ARG, y_arg - 25, patient.personal["hb"])
+        self.board.drawString(x_arg, y_arg, patient.personal["weight"])
+        self.board.drawString(x_arg, y_arg - 13, patient.personal["size"])
+        self.board.drawString(x_arg, y_arg - 25, patient.personal["hb"])
 
         self.board.setFontSize(10)
 
         if patient.identification.gender == 1:
-            self.board.drawString(X_ARG - 59 + 0.5, y_arg - 4, "✖")
+            self.board.drawString(x_arg - 59 + 0.5, y_arg - 4, "✖")
         elif patient.identification.gender == 2:
-            self.board.drawString(X_ARG - 59 + 0.5, y_arg - 23, "✖")
+            self.board.drawString(x_arg - 59 + 0.5, y_arg - 23, "✖")
 
-        self.board.drawString(X_ARG + 22.5 + 0.5, y_arg - 14, "✖")
-        self.board.drawString(X_ARG + 36.5 + 0.5, y_arg - 14, "✖")
+        self.board.drawString(x_arg + 22.5 + 0.5, y_arg - 14, "✖")
+        self.board.drawString(x_arg + 36.5 + 0.5, y_arg - 14, "✖")
 
         # Code write
         for idx, d in enumerate(patient.his):
@@ -150,21 +166,16 @@ class Report:
             else:
                 y_code -= 12.6
 
-    def draw_title_second_page(self) -> None:
-        x_title = 43.5
-        y_title = 730
-
+    def draw_title_two(self, x: float, y: float) -> None:
         self.board.setFontSize(7)
 
-        self.board.drawString(x_title, y_title, str(self.today.year))
-        self.board.drawString(
-            x_title + 36, y_title, MONTHS_ES[self.today.month]
-        )
-        self.board.drawString(x_title + 120, y_title, ESTABLISHMENT)
-        self.board.drawString(x_title + 284, y_title, SERVICE_PRODUCER)
-        self.board.drawString(x_title + 473, y_title, DNI_CREATOR)
+        self.board.drawString(x, y, str(self.today.year))
+        self.board.drawString(x + 36, y, MONTHS_ES[self.today.month])
+        self.board.drawString(x + 120, y, ESTABLISHMENT)
+        self.board.drawString(x + 284, y, SERVICE_PRODUCER)
+        self.board.drawString(x + 473, y, DNI_CREATOR)
 
-    def draw_body_second_page(self) -> None:
+    def draw_body_two(self) -> None:
         y_dni: float = 616 + 58
         y_name: float = 632.5 + 58
         y_arg: float = 621 + 57
@@ -196,10 +207,10 @@ class Report:
         y_arg: float,
         y_code: float,
     ) -> None:
-        X_DNI = 75.5 - 10
-        X_NAME = 140 - 11 + 3
-        X_ARG = 290 - 16 + 12
-        x_code = 345.5 - 8 + 3 + 3
+        X_DNI = 65.5
+        X_NAME = 132
+        X_ARG = 286
+        x_code = 343.5
 
         # DNI, Home district, Population center and Day
         self.board.setFontSize(10)
@@ -224,7 +235,11 @@ class Report:
             y_name,
             f"{patient.identification.father_last_name} {patient.identification.mother_last_name} {patient.identification.names}",
         )
-        self.board.drawString(X_NAME + 218, y_name + 1, patient.age.format)
+        self.board.drawString(
+            X_NAME + 217,
+            y_name + 0.5,
+            f"{patient.age.b.day}  {patient.age.b.month}   {patient.age.b.year}",
+        )
 
         # Age, Gender, Weight, Size, Hb and Service
         self.board.setFontSize(6)
@@ -276,13 +291,13 @@ class Report:
                 y_code -= 12.6
 
     def generate(self) -> None:
-        self.draw_title_first_page()
-        self.draw_body_first_page()
+        self.draw_title_one(self.X_TITLE, self.Y_TITLE)
+        self.draw_body_one(self.X_DNI, self.X_NAME, self.X_ARG, self.X_CODE)
 
         self.add_next_page()
 
-        self.draw_title_second_page()
-        self.draw_body_second_page()
+        self.draw_title_two(self.X_TITLE - 7.5, self.Y_TITLE + 56.7)
+        self.draw_body_two()
 
     def save(self) -> io.BytesIO:
         self.board.save()

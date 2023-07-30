@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any, NamedTuple
 
 
@@ -36,6 +37,7 @@ class CurrentAge(NamedTuple):
     years: int
     months: int
     days: int
+    b: date
     format: str
     second_format: str
 

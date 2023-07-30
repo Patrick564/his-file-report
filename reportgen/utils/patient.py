@@ -27,7 +27,8 @@ def current_age(birthday: str) -> CurrentAge:
         years=abs(years),
         months=abs(months),
         days=abs(days),
-        format=f"{start.day}   {start.month}    {start.year}",
+        b=start,
+        format=f"{start.day}     {start.month}     {start.year}",
         second_format=f"{start.day}/{start.month}/{start.year}",
     )
 
