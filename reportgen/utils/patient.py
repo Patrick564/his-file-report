@@ -1,4 +1,5 @@
 import json
+from calendar import monthrange
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from math import ceil
@@ -114,6 +115,7 @@ class TempPatient:
     appointment: str = field(init=False)
     type_of_birth: int = field(init=False)
     diagnostic: list[Control] = field(init=False)
+    age_diagnostic: Age = field(init=False)
 
     def __post_init__(self) -> None:
         patient = self.load_from_json()
@@ -140,30 +142,46 @@ class TempPatient:
         return patients[f"{self.dni}"]
 
     def current_age(self) -> Age:
-        today = datetime.now(tz=ZoneInfo("America/Lima")).date()
+        year, month, day, *_ = datetime.now(
+            tz=ZoneInfo("America/Lima")
+        ).timetuple()
 
-        difference = today - self.birthday
+        if day < self.birthday.day:
+            month -= 1
+            day += monthrange(self.birthday.year, self.birthday.month)[1]
 
-        years = difference.days // 365
-        months = (difference.days % 365) // 30
-        days = (difference.days % 365) % 30
+        if month < self.birthday.month:
+            year -= 1
+            month += 12
 
-        return Age(abs(years), abs(months), abs(days))
+        return Age(
+            year - self.birthday.year,
+            month - self.birthday.month,
+            day - self.birthday.day,
+        )
 
     def load_diagnostic(self) -> list[Control]:
         with open("database/codes.json", encoding="utf-8") as f:
             diagnostics = json.load(f)
 
-        if self.age.years == 0 and self.age.months == 0:
-            raw_diagnostic = diagnostics["RN"][f"{self.age.days}_days"]
-        elif self.age.years > 5:
-            raw_diagnostic = diagnostics["5_years"][
-                f"{self.age.months}_months"
-            ]
-        else:
-            raw_diagnostic = diagnostics[f"{self.age.years}_years"][
-                f"{self.age.months}_months"
-            ]
+        # h = Age(0, 0, 0)
+
+        try:
+            if self.age.years == 0 and self.age.months == 0:
+                raw_diagnostic = diagnostics["RN"][f"{self.age.days}_days"]
+            elif self.age.years > 5:
+                raw_diagnostic = diagnostics["5_years"][
+                    f"{self.age.months}_months"
+                ]
+            else:
+                raw_diagnostic = diagnostics[f"{self.age.years}_years"][
+                    f"{self.age.months}_months"
+                ]
+        except KeyError:
+            # for i in range(1, 8):
+            # print(i)
+            raw_diagnostic = []
+            # print(key)
 
         return [
             Control(

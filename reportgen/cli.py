@@ -51,7 +51,7 @@ def config(
     show_config: Annotated[bool, typer.Option("--show", "-s")] = False,
 ) -> None:
     """
-    Listar las configuraciones actuales del usuario. A E
+    Listar las configuraciones actuales del usuario.
     """
 
     if dni is not None:
@@ -81,6 +81,11 @@ def config(
 [blue]UPSS:[/blue]            {user.service_producer}
                 """
         )
+
+
+@app.command("exams")
+def exams_current_month():
+    ...
 
 
 @app.command("generate")

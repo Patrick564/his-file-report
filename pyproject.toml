@@ -44,6 +44,12 @@ no_implicit_optional = true
 check_untyped_defs = true
 
 
+[tool.pytest.ini_options]
+addopts = [
+    "--strict-config",
+]
+
+
 [tool.ruff]
 select = [
     "E",  # pycodestyle errors
@@ -52,7 +58,7 @@ select = [
     "I",  # isort
     "C",  # flake8-comprehensions
     "B",  # flake8-bugbear
-    # "UP",  # alert you when better syntax is available in your python version
+    #  "UP",  # alert you when better syntax is available in your python version
 ]
 ignore = [
     "E501",  # line too long, handled by black
@@ -61,6 +67,8 @@ ignore = [
 ]
 
 target-version = "py311"
+line-length = 79
+
 
 [tool.black]
-line-length = 79
+line_length = 79
